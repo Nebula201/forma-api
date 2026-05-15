@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: forma-backend
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/forma?reWriteBatchedInserts=true
+    username: forma
+    password: pwd_forma
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database: POSTGRESQL
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
