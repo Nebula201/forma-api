@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @Schema(name = "数据提交请求实体")
 @Data
-public class SubmissionSubmitRequest {
+public class SubmissionSubmitCommand {
     @Schema(description = "表单版本", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer formVersion;
     @Schema(description = "数据内容", requiredMode = Schema.RequiredMode.REQUIRED)

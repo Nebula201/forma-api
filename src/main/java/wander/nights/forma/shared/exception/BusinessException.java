@@ -1,17 +1,27 @@
 package wander.nights.forma.shared.exception;
 
-import org.springframework.http.ProblemDetail;
+import lombok.Getter;
 
+@Getter
 public class BusinessException extends RuntimeException {
+    private final int code;      // 业务错误码
+    private final String detail;
 
-    public BusinessException(String message) {
+    public BusinessException(int code, String message) {
         super(message);
+        this.code = code;
+        this.detail = message;
     }
 
-    public ProblemDetail toProblemDetail() {
-        ProblemDetail detail = ProblemDetail.forStatus(500);
-        detail.setTitle("系统异常");
-        detail.setDetail(getMessage());
-        return detail;
+    public BusinessException(int code, String message, String detail) {
+        super(message);
+        this.code = code;
+        this.detail = detail;
+    }
+
+    public BusinessException(int code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+        this.detail = message;
     }
 }

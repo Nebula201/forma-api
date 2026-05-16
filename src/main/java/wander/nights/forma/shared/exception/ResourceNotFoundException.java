@@ -1,16 +1,11 @@
 package wander.nights.forma.shared.exception;
 
-import org.springframework.http.ProblemDetail;
-
+/**
+ * 资源不存在
+ */
 public class ResourceNotFoundException extends BusinessException {
-    public ResourceNotFoundException(String message) {
-        super(message);
-    }
-
-    @Override
-    public ProblemDetail toProblemDetail() {
-        ProblemDetail detail = ProblemDetail.forStatus(404);
-        detail.setTitle("资源不存在");
-        return detail;
+    public ResourceNotFoundException(String resourceName, Object id) {
+        super(ErrorCode.RESOURCE_NOT_FOUND, resourceName + "不存在",
+                String.format("%s[id=%s] 不存在", resourceName, id));
     }
 }

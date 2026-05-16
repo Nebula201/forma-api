@@ -7,11 +7,10 @@ import jakarta.persistence.Embeddable;
 
 import java.util.UUID;
 
-@Schema(description = "表单Id（值对象）")
 @Embeddable
+@Schema(description = "表单Id（值对象）")
 public record FormId(
         @JsonValue
-        @Column(name = "form_id")
         UUID value
 ) {
     public static FormId of(String valueStr) {

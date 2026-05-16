@@ -2,12 +2,12 @@ package wander.nights.forma.form.command.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import wander.nights.forma.shared.config.JpaConverters;
 import wander.nights.forma.shared.valueobject.FieldCode;
 import wander.nights.forma.shared.valueobject.FormId;
 import wander.nights.forma.shared.valueobject.FormSubmissionId;
@@ -16,12 +16,13 @@ import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "form_submissions")
 @Data
 @SQLDelete(sql = "UPDATE form_submissions SET deleted_at = now() WHERE submission_id = ?")  // 替换 DELETE 操作
 @SQLRestriction("deleted_at is null")  // 自动过滤已删除的记录
-public class FormSubmission {
+public class FormSubmission extends BaseEntity {
 
     /**
      * 数据Id
@@ -33,6 +34,7 @@ public class FormSubmission {
      * 表单Id
      */
     @Column(name = "form_id")
+    @Convert(converter = JpaConverters.FormIdConverter.class)
     private FormId formId;
 
     /**
@@ -58,6 +60,7 @@ public class FormSubmission {
      * 提交Ip
      */
     @Column(name = "submitted_ip")
+    @JdbcTypeCode(SqlTypes.INET)
     private InetAddress submittedIp;
 
     /**
@@ -66,17 +69,4 @@ public class FormSubmission {
     @Column(name = "duration_second")
     private Integer durationSecond;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
-    /**
-     * 删除时间
-     */
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
 }

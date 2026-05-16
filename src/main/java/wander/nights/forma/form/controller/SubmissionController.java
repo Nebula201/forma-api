@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import wander.nights.forma.form.command.dto.SubmissionSubmitRequest;
-import wander.nights.forma.dto.response.SubmissionVo;
+import wander.nights.forma.form.command.dto.SubmissionSubmitCommand;
+import wander.nights.forma.form.query.dto.submission.SubmissionVo;
 import wander.nights.forma.form.query.dto.FormSubmissionReadRequests;
 import wander.nights.forma.form.query.service.FormSubmissionReadService;
 import wander.nights.forma.form.command.service.FormSubmissionCommandService;
@@ -28,7 +28,7 @@ public class SubmissionController {
     @PostMapping
     public Result<FormSubmissionId> submit(
             @PathVariable FormId formId,
-            @Validated @RequestBody SubmissionSubmitRequest request
+            @Validated @RequestBody SubmissionSubmitCommand request
     ) {
         return Result.ok(formSubmissionCommandService.submit(formId, request));
     }

@@ -3,14 +3,14 @@ package wander.nights.forma.form.command.entity;
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import wander.nights.forma.shared.config.JpaConverters;
 import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.valueobject.FormRoleCode;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -18,10 +18,11 @@ import java.util.UUID;
 /**
  * 表单角色
  */
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "form_roles")
 @Data
-public class FormRole {
+public class FormRole extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,14 +31,15 @@ public class FormRole {
     /**
      * 表单Id
      */
-    @Embedded
     @Column(name = "form_id")
+    @Convert(converter = JpaConverters.FormIdConverter.class)
     private FormId formId;
     /**
      * 角色编码
      */
     @Column(name = "role_code")
-    private String roleCode;
+    @Convert(converter = JpaConverters.FormRoleCodeConverter.class)
+    private FormRoleCode code;
     /**
      * 角色名称
      */
@@ -64,14 +66,6 @@ public class FormRole {
     @Column(name = "access_permissions")
     private AccessPermission accessPermissions;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
 
     // ==================== 内部类 ====================
 
@@ -81,12 +75,12 @@ public class FormRole {
     @Getter
     public enum OperationPermission {
         // 提交记录权限
-        SUBMISSION_ADD("submission.add", "新建记录"),
-        SUBMISSION_EDIT("submission.edit", "编辑记录"),
-        SUBMISSION_DELETE("submission.delete", "删除记录"),
-        SUBMISSION_VIEW("submission.view", "查看记录"),
-        SUBMISSION_EXPORT("submission.export", "导出记录"),
-        SUBMISSION_STATS("submission.stats", "数据统计"),
+        SUBMISSION_ADD("submission.add", "允许新建记录"),
+        SUBMISSION_EDIT("submission.edit", "允许编辑记录"),
+        SUBMISSION_DELETE("submission.delete", "允许删除记录"),
+        SUBMISSION_VIEW("submission.view", "允许查看记录"),
+        SUBMISSION_EXPORT("submission.export", "允许导出记录"),
+        SUBMISSION_STATS("submission.stats", "允许数据统计"),
 
         // 表单管理权限
         FORM_EDIT("form.edit", "编辑表单"),
@@ -97,6 +91,8 @@ public class FormRole {
         // 高级权限
         SUBMISSION_APPROVE("submission.approve", "审核记录"),
         SUBMISSION_ASSIGN("submission.assign", "分配记录");
+
+        public static final Set<OperationPermission> ALL = Set.of(values());
 
         @JsonValue
         private final String code;
@@ -139,6 +135,4 @@ public class FormRole {
         private String operator;      // 操作符：eq, ne, gt, lt, like, in
         private Object value;         // 值
     }
-
-
 }

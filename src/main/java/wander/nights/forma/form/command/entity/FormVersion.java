@@ -2,11 +2,13 @@ package wander.nights.forma.form.command.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import wander.nights.forma.model.FormContent;
+import wander.nights.forma.shared.config.JpaConverters;
 import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.FormVersionId;
+import wander.nights.forma.shared.valueobject.UserId;
 
 import java.net.InetAddress;
 import java.time.Instant;
@@ -26,20 +28,23 @@ import java.util.UUID;
  * @author Wander Nights
  * @since 1.0.0
  */
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "form_versions")
 @Entity
 @Data
-public class FormVersion {
+public class FormVersion extends BaseEntity {
     /**
      * Id
      */
-    @EmbeddedId
-    private FormVersionId formVersionId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID formVersionId;
 
     /**
      * 表单Id
      */
     @Column(name = "form_id")
+    @Convert(converter = JpaConverters.FormIdConverter.class)
     private FormId formId;
 
     /**
@@ -59,7 +64,8 @@ public class FormVersion {
      * 发布人
      */
     @Column(name = "published_by")
-    private UUID publishedBy;
+    @Convert(converter = JpaConverters.UserIdConverter.class)
+    private UserId publishedBy;
 
     /**
      * 发布时间
