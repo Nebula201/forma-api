@@ -9,7 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import wander.nights.forma.shared.config.JpaConverters;
+import wander.nights.forma.shared.context.RequestContext;
 import wander.nights.forma.shared.valueobject.UserId;
 
 import java.time.Instant;
@@ -60,18 +60,18 @@ public class BaseEntity {
 
     @PreUpdate
     public void preUpdate() {
-        // 从 ThreadLocal 获取当前 IP
-//        String ip = AuditContext.getCurrentIp();
-//        if (ip != null) {
-//            this.updatedIp = ip;
-//        }
+        fillIp();
     }
 
     @PrePersist
     public void prePersist() {
-//        String ip = AuditContext.getCurrentIp();
-//        if (ip != null) {
-//            this.updatedIp = ip;
-//        }
+        fillIp();
+    }
+
+    private void fillIp() {
+        var env = RequestContext.env();
+        if (env != null && env.ip() != null) {
+            this.updatedIp = env.ip().getHostAddress();
+        }
     }
 }

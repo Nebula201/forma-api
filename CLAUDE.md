@@ -2,174 +2,142 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 语言偏好
+
+请始终使用简体中文回复。
+
 ## Project Overview
 
-Forma is a form/ questionnaire building platform backend service built on Spring Boot 3.5 + Java 21 + PostgreSQL. Core features include drag-and-drop form design, complex skip logic, JSONB flexible storage, and event-driven architecture for business decoupling.
+Forma is a form/questionnaire building platform backend built on Spring Boot 3.5 + Java 21 + PostgreSQL. Core features
+include drag-and-drop form design, skip logic via rule definitions, JSONB flexible storage, and event-driven
+architecture.
 
 ## Build, Test, and Run
 
-### Development Commands
-
 ```bash
-# Run application
+# Run application (requires PostgreSQL at 127.0.0.1:5432/forma)
 ./mvnw spring-boot:run
 
 # Build project
 ./mvnw clean package
 
-# Run tests
+# Run all tests
 ./mvnw test
 
 # Run single test
-./mvnw test -Dtest=ShortIdTest
+./mvnw test -Dtest=FormCommandServiceTest
 
-# Database migrations
-# Flyway migrations are automatically executed on startup
+# Flyway migrations run automatically on startup
 # New migrations: src/main/resources/db/migration/V{version}__description.sql
 ```
 
-### Configuration
-
 - **Application config**: `src/main/resources/application.yaml`
-- **Database**: PostgreSQL at `jdbc:postgresql://127.0.0.1:5432/forma`
-- **Flyway baseline**: Enabled on first migration
+- **Database**: PostgreSQL at `jdbc:postgresql://127.0.0.1:5432/forma`, user `forma`, password `pwd_forma`
+- **JPA ddl-auto**: `validate` — schema is managed by Flyway only, never by Hibernate
 
 ## Architecture Overview
 
-### Dual Persistence Strategy (JPA + JdbcTemplate)
+### CQRS Package Structure
 
-- **JPA (80% use case)**: Standard CRUD, entity mapping, simple associations
-- **JdbcTemplate (20% use case)**: Complex queries, batch operations, dynamic DDL, JSONB manipulation
-
-**Important**: Clear cache after JdbcTemplate updates with `jdbcTemplate.update()`.
-
-### Event-Driven Design
-
-All key business operations emit events (create, publish, submit, delete, update):
-- Uses Spring's `ApplicationEventPublisher` for built-in event bus
-- All listeners use `@EventListener` + `@Async` for async processing
-- Event data is self-contained (no reverse DB queries in listeners)
-- Failed event processing doesn't rollback main transaction
-- Consider RabbitMQ for reliable cross-service delivery (future)
-
-### Form Versioning Strategy
-
-**Core concept**: Different versions create different formSubmission tables, but minor versions (is_minor=true) reuse existing tables.
+The `form` domain follows Command Query Responsibility Segregation:
 
 ```
-form_versions table:
-- form_content: JSONB snapshot of form definition
-- is_minor: TRUE = only text/rule changes, no new table
-- submission_table: Name of formSubmission table (e.g., submissions_{shortId}_v{version})
-
-Migration path:
-1. Version 1 → Field changes: Create submissions_form_xxx_v1
-2. Version 2 (minor, is_minor=true) → No new table, data remains in v1
-3. Version 3 (major, is_minor=false) → Create v3, new submissions go to v3, v1 kept for history
+wander.nights.forma.form
+├── command/                    # Write side
+│   ├── entity/                 # JPA entities (Form, FormVersion, FormSubmission, FormRole, FormCollaborator)
+│   ├── repository/             # Spring Data JPA repositories
+│   ├── service/                # Command service interfaces + impl/
+│   ├── dto/                    # Command DTOs (FormCreateCommand, SubmissionSubmitCommand, etc.)
+│   └── service/FormFactory     # Entity construction factory (IDs, defaults, roles)
+├── query/                      # Read side
+│   ├── service/                # Query service interfaces + impl/
+│   └── dto/                    # Read DTOs / VOs
+└── controller/                 # REST controllers (inject both command and query services)
 ```
 
-### Submission Data Management
+Command and query services are separate interfaces with separate implementations. Controllers inject both sides.
 
-Each form version has its own formSubmission table with:
-- **Fixed columns**: id, submission_id (UUID v7), respondent_id, submitted_at, ip_address, duration_seconds, status, created_at, updated_at
-- **Dynamic columns**: Created from `form_content.fields` definition
-- **Indexes**: Auto-created for key fields (submission_id, submitted_at, status, filterable fields like radio/select/rating)
+### Value Objects with JPA Converters
 
-### Logical Deletion Pattern
+Domain identifiers and typed codes are modeled as Java records with `@Embeddable` or standalone, converted via
+`JpaConverters`:
 
-Forms use `@SQLDelete` and `@SQLRestriction` instead of actual DELETE:
+- `FormId` (UUID) — `@Embeddable`, used as `@EmbeddedId` on Form
+- `FormSubmissionId` (UUID) — `@Embeddable`, used as `@EmbeddedId` on FormSubmission
+- `UserId` (String) — `@Embeddable`, auto-applied converter
+- `FieldCode` (String) — standalone record, used as Map keys in submission content
+- `FormRoleCode` (String) — auto-applied converter
+
+All converters are in `shared.config.JpaConverters` with `@Converter(autoApply = true)`.
+
+### JSONB Polymorphic Serialization
+
+`FieldDefinition` uses Jackson `@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")` for polymorphic
+deserialization of form fields stored in `forms.fields` (JSONB). The `@JsonSubTypes` mapping maps type names to concrete
+classes — some types share implementations (e.g., text/textarea/email/phone all map to `TextField`;
+radio/checkbox/select map to `SelectField`).
+
+`FormSubmission.content` is `Map<FieldCode, Object>` stored as JSONB — each key is a field code, value is the submitted
+data.
+
+### Event System
+
+Events use a typed envelope pattern:
+
+- `DomainEvent` — interface with `eventType()` and `eventVersion()` (e.g., `FormCreatedV1`)
+- `FormaEvent<T extends DomainEvent>` — envelope with `eventId` (UUID v7 via `GUID.v7()`), `eventAt`, `eventType`,
+  `eventVersion`, `traceId`, `payload`
+- `EventRegistry` — maps `"eventType:vN"` strings to concrete DomainEvent classes for deserialization
+- `Events` — static serialize/deserialize utility using Jackson
+
+Current registered events: `form.created:v1`, `form.published:v1`, `submission.submitted:v1`
+
+### Soft Delete Pattern
+
+Entities use Hibernate annotations for logical deletion:
+
 ```java
 @SQLDelete(sql = "UPDATE forms SET deleted_at = now() WHERE form_id = ?")
 @SQLRestriction("deleted_at is null")
 ```
 
-All queries automatically filter out soft-deleted records.
+Applied to: Form, FormSubmission. All queries automatically exclude soft-deleted records.
 
-### JSONB Field Storage
+### Form Roles and Collaborators
 
-Fields are stored in JSONB arrays in `forms.fields` and `forms.rules`:
-- Uses polymorphic `FieldDefinition` hierarchy with Jackson `@JsonTypeInfo` for type differentiation
-- Field types: text, textarea, email, phone, radio, checkbox, select, rating, date, time, datetime, number, file
-- Checkbox/select fields store multiple values as JSONB arrays
-- FieldDefinition hierarchy: `TextField`, `SelectField`, `RatingField`, `DateField`, `FileField`
+- `FormRole` — per-form role with `OperationPermission` enum (submission/form CRUD, approve, assign) and
+  `AccessPermission` (field-level + record filter conditions)
+- `FormCollaborator` — links a UserId to a FormId with a FormRoleCode; partial unique index on
+  `(form_id, user_id) WHERE deleted_at IS null`
+- `FormFactory` creates default roles (owner, admin, viewer) and the owner collaborator on form creation
 
-## Key Patterns and Conventions
+### Error Handling
 
-### Entity Design
+- `ErrorCode` interface — numeric codes by module: 1xxx general, 2xxx user, 3xxx form, 9xxx system
+- Exception hierarchy: `BusinessException` (with code + detail), `ResourceNotFoundException`,
+  `PermissionDeniedException`, `OperationNotAllowException`, `SystemException`
+- `GlobalExceptionHandler` returns RFC 7807 `ProblemDetail` responses with `code` and `timestamp` properties
+- Success responses use `Result<T>` wrapper: `{ "code": 200, "message": "", "data": T }`
 
-- All entities in `wander.nights.forma.entity`
-- Use Lombok for boilerplate (`@Data`, `@Setter(onMethod_ = @Autowired)`)
-- JPA audit fields: `@CreatedDate`, `@CreatedBy`, `@LastModifiedDate`, `@LastModifiedBy`
-- Logical deletion with `@SQLDelete` and `@SQLRestriction`
+### Database Schema
 
-### Service Layer
+Five tables managed by Flyway (`V0.1.0__init_table.sql`):
 
-- Business logic in `wander.nights.forma.service`
-- JdbcTemplate for dynamic table operations (DDL, complex queries)
-- Keep JPA and JdbcTemplate usage clearly separated
-- Validation service (SubmissionValidationService) is implemented but commented out
-- Current status: Core validation logic exists, needs to be integrated with formSubmission flow
+- `forms` — form definitions with JSONB fields/rules/settings, status (DRAFT/PUBLISHED/CLOSED)
+- `form_versions` — published snapshots with `form_content` JSONB
+- `form_submissions` — submission data with `content` JSONB map, `form_id` + `form_version` reference
+- `form_roles` — per-form roles with JSONB operation/access permissions
+- `form_collaborators` — user-to-form role assignments
 
-### Controller Layer
+All tables have `created_by`, `created_at`, `updated_by`, `updated_at`, `updated_ip` (inet), `deleted_at` audit columns
+via `BaseEntity`.
 
-- RESTful endpoints under `/v1/` prefix
-- Use `Result<T>` wrapper for responses: `{ "code": 200, "message": "success", "data": {...} }`
-- Validation via Jakarta `@Valid`
+## Key Conventions
 
-### Event System
-
-- Base class: `FormaEvent` (abstract) - includes eventId, eventType, eventAt, traceId
-- Uses `GUID.v7().toUUID()` for generating UUID v7 in events
-- Event listeners should be lightweight and self-contained
-- Avoid reverse database queries in event handlers
-
-### Database Migrations
-
-- Flyway format: `V{version}__description.sql`
-- Location: `src/main/resources/db/migration/`
-- Each migration script must be idempotent (use `CREATE TABLE IF NOT EXISTS`, etc.)
-
-### Testing
-
-- Main entry point: `FormaApplicationTests.java`
-- Test structure mirrors main code
-- Mock dependency injection with Lombok `@Setter(onMethod_ = @Autowired)` in tests
-- Existing test: `ShortIdTest.java` - Base62 short code generation for form short_id field
-
-## Important Design Decisions
-
-1. **JPA + JdbcTemplate hybrid**: Keep distinct - JPA for CRUD, JdbcTemplate for complex operations. Clear cache after JdbcTemplate updates.
-
-2. **Event data self-containment**: Don't query DB from listeners. Pass necessary data in events.
-
-3. **API versioning**: All APIs use `/v1/` prefix from the start.
-
-4. **Logical deletion**: Forms use soft delete, not hard delete. Query automatically filters out deleted records.
-
-5. **Version isolation**: Different form versions create different formSubmission tables. Minor versions reuse existing tables.
-
-6. **Skip logic validation**: The validation service is implemented but commented out. It validates:
-   - Visible fields based on skip rules
-   - Hidden fields don't have values
-   - Required field validation
-   - Type-specific validation (email, phone, rating, checkbox)
-
-## Current Implementation Status
-
-**Implemented**:
-- Database schema and Flyway migrations
-- Entity models (Form, FormVersion)
-- Basic field types (TextField, SelectField, RatingField, DateField, FileField)
-- Form formSubmission table creation with dynamic DDL
-- Submission validation logic (commented out, ready to integrate)
-- Event base class structure
-
-**To Complete**:
-- Form repository and CRUD operations
-- Form versioning and publishing logic
-- Submission flow integration (Controller ↔ Service ↔ Repository)
-- Skip logic engine implementation
-- Event listener implementations
-- Controller implementations for full API
-- Database query optimization for formSubmission retrieval
-- Statistics and reporting features
+- Controllers use `@Setter(onMethod_ = @Autowired)` for DI (Lombok), services use `@RequiredArgsConstructor`
+- API endpoints are under `/v1/` prefix with springdoc-openapi annotations (`@Tag`, `@Operation`)
+- `FormFactory` centralizes entity construction — IDs are generated with `GUID.v7().toUUID()` (uuid-creator library)
+- `BaseEntity` provides JPA auditing (`@CreatedDate`, `@CreatedBy`, `@LastModifiedDate`, `@LastModifiedBy`) and soft
+  delete (`deletedAt`)
+- IP auditing in `BaseEntity` (`@PreUpdate`/`@PrePersist`) is commented out pending `AuditContext` implementation
+- Spring Security dependency is present but not yet configured
