@@ -70,4 +70,57 @@ public class FormSubmission extends BaseEntity {
     @Column(name = "duration_second")
     private Integer durationSecond;
 
+    /**
+     * 二维码追踪码
+     */
+    @Column(name = "tracking_id")
+    private String trackingId;
+
+    /**
+     * 浏览器 User-Agent
+     */
+    @Column(name = "ua")
+    private String ua;
+
+    /**
+     * 来源渠道
+     */
+    @Column(name = "referrer")
+    private String referrer;
+
+    /**
+     * 设备类型 手机/桌面设备/平板
+     */
+    @Column(name = "device_type")
+    private String deviceType;
+
+    /**
+     * 设备指纹
+     */
+    @Column(name = "device_hash")
+    private String deviceHash;
+
+    /**
+     * 国家
+     */
+    @Column(name = "ip_country", length = 50)
+    private String ipCountry;
+    /**
+     * 省份
+     */
+    @Column(name = "ip_province", length = 50)
+    private String ipProvince;
+
+    /**
+     * 城市
+     */
+    @Column(name = "ip_city", length = 50)
+    private String ipCity;
+
+    /**
+     * 额外属性
+     */
+    @Column(name = "attributes")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> attributes;
 }

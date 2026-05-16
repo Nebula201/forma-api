@@ -76,9 +76,9 @@ comment on column form_versions.version is '乐观锁';
 create table if not exists form_submissions
 (
     submission_id   uuid primary key default gen_random_uuid(),
-    form_id         uuid,
-    form_version    int,
-    content         jsonb,
+    form_id         uuid  not null,
+    form_version    int   not null,
+    content         jsonb not null,
     submitted_at    timestamptz      default current_timestamp,
     submitted_ip    inet,
     duration_second int,
@@ -88,7 +88,17 @@ create table if not exists form_submissions
     updated_at      timestamptz      default current_timestamp,
     updated_ip      inet,
     deleted_at      timestamptz,
-    version         int              default 0
+    version         int              default 0,
+    tracking_id     varchar(64),
+    ua              varchar(255),
+    os              varchar(50),
+    referrer        varchar(64),
+    device_type     varchar(16),
+    device_hash     varchar(32),
+    ip_country      varchar(50),
+    ip_province     varchar(50),
+    ip_city         varchar(50),
+    attributes      jsonb
 );
 comment on table form_submissions is '表单数据表';
 comment on column form_submissions.submission_id is '数据Id';
@@ -105,6 +115,16 @@ comment on column form_submissions.updated_at is '最后修改时间';
 comment on column form_submissions.updated_ip is '最后修改IP';
 comment on column form_submissions.deleted_at is '软删除标记';
 comment on column form_submissions.version is '乐观锁';
+comment on column form_submissions.tracking_id is '二维码追踪码';
+comment on column form_submissions.ua is '浏览器 User-Agent';
+comment on column form_submissions.os is '操作系统';
+comment on column form_submissions.referrer is '来源渠道';
+comment on column form_submissions.device_type is '设备类型 手机/桌面设备/平板';
+comment on column form_submissions.device_hash is '设备指纹';
+comment on column form_submissions.ip_country is '国家';
+comment on column form_submissions.ip_province is '省份';
+comment on column form_submissions.ip_city is '城市';
+comment on column form_submissions.attributes is '额外属性';
 
 create index if not exists idx_submissions_form_submitted
     on form_submissions (form_id, submitted_at)

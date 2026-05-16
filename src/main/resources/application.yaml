@@ -26,3 +26,15 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+
+ip2region:
+  v4:
+    enabled: true
+    db-path: file:///C:/Users/W/Desktop/ip2region_v4.xdb
+    searchers: 15
+    cache-policy: VIndexCache  # NoCache, VIndexCache, BufferCache
+  v6:
+    enabled: true  # 如果没有 IPv6 数据文件，设为 false
+    db-path: file:///C:/Users/W/Desktop/ip2region_v6.xdb
+    searchers: 15
+    cache-policy: VIndexCache
