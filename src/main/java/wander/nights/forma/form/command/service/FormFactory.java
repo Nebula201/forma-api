@@ -32,6 +32,7 @@ public class FormFactory {
         form.setCode(code);
         form.setTitle(title);
         form.setDescription(description);
+        form.setStatus(Form.Status.DRAFT);
         return form;
     }
 

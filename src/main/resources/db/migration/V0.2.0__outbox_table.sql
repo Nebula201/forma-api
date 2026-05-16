@@ -9,7 +9,8 @@ create table if not exists outbox_events
     published_at  timestamp,
     max_retries   int         not null default 3,
     retry_count   int         not null default 0,
-    failed_reason varchar(255)
+    failed_reason varchar(255),
+    version       int                  default 0
 );
 
 comment on table outbox_events is '事件发件箱';
@@ -23,5 +24,6 @@ comment on column outbox_events.published_at is '发布时间';
 comment on column outbox_events.max_retries is '最大重试次数';
 comment on column outbox_events.retry_count is '已重试次数';
 comment on column outbox_events.failed_reason is '失败原因';
+comment on column outbox_events.version is '乐观锁';
 
 create index idx_outbox_status_event_at on outbox_events (status, event_at) where status = 'PENDING';

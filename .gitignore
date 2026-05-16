@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Claude Code 相关
+.claude/settings.local.json
+.claude/credentials.json
+.claude/*.log

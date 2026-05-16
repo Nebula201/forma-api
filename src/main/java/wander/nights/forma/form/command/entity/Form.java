@@ -21,8 +21,8 @@ import java.util.List;
 @Entity
 @Table(name = "forms")
 @Data
-@SQLDelete(sql = "UPDATE forms SET deleted_at = now() WHERE form_id = ?")  // 替换 DELETE 操作
-@SQLRestriction("deleted_at is null")  // 自动过滤已删除的记录
+@SQLDelete(sql = "update forms set deleted_at = now(), version = version + 1 where form_id = ? and version = ?")
+@SQLRestriction("deleted_at is null")
 public class Form extends BaseEntity {
     /**
      * 表单Id

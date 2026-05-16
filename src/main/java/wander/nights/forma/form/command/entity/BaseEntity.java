@@ -57,6 +57,13 @@ public class BaseEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    /**
+     * 乐观锁
+     */
+    @Version
+    @Column(name = "version")
+    private int version = 0;
+
 
     @PreUpdate
     public void preUpdate() {

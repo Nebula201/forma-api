@@ -3,6 +3,8 @@ package wander.nights.forma.form.command.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import wander.nights.forma.shared.config.JpaConverters;
 import wander.nights.forma.shared.valueobject.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
@@ -17,6 +19,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "form_collaborators")
 @Data
+@SQLDelete(sql = "update form_collaborators set deleted_at = now(), version = version + 1 where id = ? and version = ?")
+@SQLRestriction("deleted_at is null")
 public class FormCollaborator extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

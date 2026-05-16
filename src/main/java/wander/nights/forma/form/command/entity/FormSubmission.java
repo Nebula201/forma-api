@@ -20,7 +20,7 @@ import java.util.Map;
 @Entity
 @Table(name = "form_submissions")
 @Data
-@SQLDelete(sql = "UPDATE form_submissions SET deleted_at = now() WHERE submission_id = ?")  // 替换 DELETE 操作
+@SQLDelete(sql = "update form_submissions set deleted_at = now(), version = version + 1 where submission_id = ? and version = ?")
 @SQLRestriction("deleted_at is null")  // 自动过滤已删除的记录
 public class FormSubmission extends BaseEntity {
 
@@ -28,6 +28,7 @@ public class FormSubmission extends BaseEntity {
      * 数据Id
      */
     @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "submission_id"))
     private FormSubmissionId formSubmissionId;
 
     /**

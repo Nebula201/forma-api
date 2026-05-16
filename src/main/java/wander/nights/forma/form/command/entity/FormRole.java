@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import wander.nights.forma.shared.config.JpaConverters;
 import wander.nights.forma.shared.valueobject.FormId;
@@ -22,6 +24,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "form_roles")
 @Data
+@SQLDelete(sql = "update form_roles set deleted_at = now(), version = version + 1 where form_role_id = ? and version = ?")
+@SQLRestriction("deleted_at is null")
 public class FormRole extends BaseEntity {
 
     @Id

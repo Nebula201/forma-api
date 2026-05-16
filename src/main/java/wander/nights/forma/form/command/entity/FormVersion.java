@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import wander.nights.forma.model.FormContent;
 import wander.nights.forma.shared.config.JpaConverters;
@@ -32,6 +34,8 @@ import java.util.UUID;
 @Table(name = "form_versions")
 @Entity
 @Data
+@SQLDelete(sql = "update form_versions set deleted_at = now(), version = version + 1 where form_version_id = ? and version = ?")
+@SQLRestriction("deleted_at is null")  // 自动过滤已删除的记录
 public class FormVersion extends BaseEntity {
     /**
      * Id

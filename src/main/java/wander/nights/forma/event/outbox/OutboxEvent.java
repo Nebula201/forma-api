@@ -80,7 +80,7 @@ public class OutboxEvent {
 
     @Version
     @Column(name = "version")
-    private long version = 0;
+    private int version = 0;
 
     public enum Status {
         PENDING, SENT, FAILED
