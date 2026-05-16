@@ -3,7 +3,7 @@ spring:
     name: forma-backend
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://127.0.0.1:5432/forma?reWriteBatchedInserts=true
+    url: jdbc:postgresql://127.0.0.1:5432/forma?reWriteBatchedInserts=true&serverTimezone=Asia/Shanghai
     username: forma
     password: pwd_forma
   jpa:

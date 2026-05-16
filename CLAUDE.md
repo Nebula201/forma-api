@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 语言偏好
 
-请始终使用简体中文回复。
+- 请始终使用简体中文回复。
+- Git commit message 必须使用中文。
 
 ## Project Overview
 
