@@ -16,7 +16,7 @@ import java.io.IOException;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
-public class RequestContextFilter implements Filter {
+public class FormaRequestContextFilter implements Filter {
 
     private final RequestContextBuilder requestContextBuilder;
 

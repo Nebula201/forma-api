@@ -78,6 +78,10 @@ public class OutboxEvent {
     @Column(name = "failed_reason")
     private String failedReason;
 
+    @Version
+    @Column(name = "version")
+    private long version = 0;
+
     public enum Status {
         PENDING, SENT, FAILED
     }

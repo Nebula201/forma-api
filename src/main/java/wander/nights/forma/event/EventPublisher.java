@@ -21,6 +21,7 @@ public class EventPublisher {
         outboxEvent.setEventAt(event.getEventAt());
         outboxEvent.setPayload(payload);
         outboxEvent.setStatus(OutboxEvent.Status.PENDING);
+        outboxEvent.setVersion(0);
 
         outboxEventRepository.save(outboxEvent);
     }

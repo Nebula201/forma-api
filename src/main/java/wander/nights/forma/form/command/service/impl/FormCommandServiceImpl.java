@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import wander.nights.forma.event.EventPublisher;
 import wander.nights.forma.event.FormaEvent;
 import wander.nights.forma.event.payload.FormCreatedV1;
+import wander.nights.forma.event.payload.FormDeletedV1;
 import wander.nights.forma.form.command.dto.FormCreateCommand;
 import wander.nights.forma.form.command.entity.Form;
 import wander.nights.forma.form.command.entity.FormCollaborator;
@@ -18,6 +19,8 @@ import wander.nights.forma.form.command.service.FormFactory;
 import wander.nights.forma.shared.context.RequestContext;
 import wander.nights.forma.shared.valueobject.FormId;
 import wander.nights.forma.shared.valueobject.UserId;
+
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +56,7 @@ public class FormCommandServiceImpl implements FormCommandService {
         payload.setFormName(form.getTitle());
         payload.setFormDescription(form.getDescription());
         payload.setCreatedBy(userId.value());
+        payload.setCreatedAt(Instant.now());
 
         FormaEvent<FormCreatedV1> event = new FormaEvent<>(payload);
 
@@ -61,8 +65,14 @@ public class FormCommandServiceImpl implements FormCommandService {
     }
 
     @Override
+    @Transactional
     public void deleteForm(FormId formId) {
         formRepository.deleteById(formId);
+        FormDeletedV1 payload = new FormDeletedV1();
+        payload.setFormId(formId);
+        payload.setDeletedBy(RequestContext.currentUserId());
+        payload.setDeletedAt(Instant.now());
+        eventPublisher.publish(new FormaEvent<>(payload));
     }
 
 
