@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableConfigurationProperties(Ip2RegionIpService.Ip2RegionProperties.class)
 @TestPropertySource(properties = {
         "ip2region.v4.enable=true",
-        "ip2region.v4.db-path=classpath:ip2region_v4.xdb",
+        "ip2region.v4.db-path=classpath:ip2region/ip2region_v4.xdb",
         "ip2region.v6.enable=true",
-        "ip2region.v6.db-path=classpath:ip2region_v6.xdb",
+        "ip2region.v6.db-path=classpath:ip2region/ip2region_v6.xdb",
 })
 class Ip2RegionIpServiceTest {
 
