@@ -1,0 +1,29 @@
+name: forma
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: forma-postgres
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_USER: forma
+      POSTGRES_PASSWORD: pwd_forma
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:7.4.1-alpine
+    container_name: forma-redis
+    restart: always
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    restart: always
+    image: rabbitmq:4.0.2-management
+    container_name: forma-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      TZ: Asia/Shanghai
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: 123456

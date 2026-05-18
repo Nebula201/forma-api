@@ -1,4 +1,4 @@
-create table if not exists forms
+create table forms
 (
     form_id     uuid primary key,
     code        varchar(32)  not null,
@@ -14,9 +14,11 @@ create table if not exists forms
     updated_at  timestamptz default current_timestamp,
     updated_ip  inet,
     deleted_at  timestamptz,
-    version     int,
-    constraint uk_forms_code_deleted_at unique (code, deleted_at)
+    version     int
 );
+create unique index uk_forms_code on forms (code) where deleted_at is null;
+create index idx_forms_updated_at on forms (updated_at);
+
 comment on table forms is '表单主表';
 comment on column forms.form_id is '表单id';
 comment on column forms.code is '表单编码';
@@ -34,10 +36,8 @@ comment on column forms.updated_ip is '最后修改IP';
 comment on column forms.deleted_at is '软删除标记';
 comment on column forms.version is '乐观锁';
 
-create index if not exists idx_forms_updated_at on forms (updated_at);
-
 -- 表单版本表
-create table if not exists form_versions
+create table form_versions
 (
     form_version_id uuid primary key default gen_random_uuid(),
     form_id         uuid not null,
@@ -52,9 +52,10 @@ create table if not exists form_versions
     updated_at      timestamptz      default current_timestamp,
     updated_ip      inet,
     deleted_at      timestamptz,
-    version         int              default 0,
-    constraint uk_form_versions_form_form_version unique (form_id, form_version)
+    version         int              default 0
 );
+create unique index uk_form_versions_form_form_version on form_versions (form_id, form_version) where deleted_at is null;
+
 comment on table form_versions is '表单版本表';
 comment on column form_versions.form_version_id is '主键';
 comment on column form_versions.form_id is '表单id';
@@ -73,22 +74,22 @@ comment on column form_versions.version is '乐观锁';
 
 
 -- 提交数据表
-create table if not exists form_submissions
+create table form_submissions
 (
-    submission_id   uuid primary key default gen_random_uuid(),
     form_id         uuid  not null,
+    submission_no   int   not null,
     form_version    int   not null,
     content         jsonb not null,
-    submitted_at    timestamptz      default current_timestamp,
+    submitted_at    timestamptz default current_timestamp,
     submitted_ip    inet,
     duration_second int,
     created_by      varchar(50),
-    created_at      timestamptz      default current_timestamp,
+    created_at      timestamptz default current_timestamp,
     updated_by      varchar(50),
-    updated_at      timestamptz      default current_timestamp,
+    updated_at      timestamptz default current_timestamp,
     updated_ip      inet,
     deleted_at      timestamptz,
-    version         int              default 0,
+    version         int         default 0,
     tracking_id     varchar(64),
     ua              varchar(255),
     os              varchar(50),
@@ -98,11 +99,19 @@ create table if not exists form_submissions
     ip_country      varchar(50),
     ip_province     varchar(50),
     ip_city         varchar(50),
-    attributes      jsonb
-);
-comment on table form_submissions is '表单数据表';
-comment on column form_submissions.submission_id is '数据Id';
+    attributes      jsonb,
+    primary key (form_id, submission_no)
+) partition by hash (form_id);
+create table form_submissions_p00 partition of form_submissions for values with (modulus 4, remainder 0);
+create table form_submissions_p01 partition of form_submissions for values with (modulus 4, remainder 1);
+create table form_submissions_p02 partition of form_submissions for values with (modulus 4, remainder 2);
+create table form_submissions_p03 partition of form_submissions for values with (modulus 4, remainder 3);
+
+create index idx_submissions_form_submitted on form_submissions (form_id, submitted_at desc) where deleted_at is null;
+
+comment on table form_submissions is '表单提交表';
 comment on column form_submissions.form_id is '表单Id';
+comment on column form_submissions.submission_no is '提交编号';
 comment on column form_submissions.form_version is '表单版本';
 comment on column form_submissions.content is '原始内容';
 comment on column form_submissions.submitted_at is '提交时间';
@@ -126,11 +135,16 @@ comment on column form_submissions.ip_province is '省份';
 comment on column form_submissions.ip_city is '城市';
 comment on column form_submissions.attributes is '额外属性';
 
-create index if not exists idx_submissions_form_submitted
-    on form_submissions (form_id, submitted_at)
-    where deleted_at is null;
+create table form_submission_sequence
+(
+    form_id    uuid primary key,
+    current_no bigint not null default 0
+);
+comment on table form_submission_sequence is '表单提交编号表';
+comment on column form_submission_sequence.form_id is '表单Id';
+comment on column form_submission_sequence.current_no is '当前编号';
 
-create table if not exists form_collaborators
+create table form_collaborators
 (
     id         uuid primary key default gen_random_uuid(),
     form_id    uuid        not null,
@@ -144,6 +158,9 @@ create table if not exists form_collaborators
     deleted_at timestamptz,
     version    int              default 0
 );
+create unique index uk_form_collaborators_active on form_collaborators (form_id, user_id) where deleted_at is null;
+create index idx_form_collaborators_user_id on form_collaborators (user_id) where deleted_at is null;
+
 comment on table form_collaborators is '表单协作者';
 comment on column form_collaborators.id is '主键';
 comment on column form_collaborators.form_id is '表单Id';
@@ -157,16 +174,7 @@ comment on column form_collaborators.updated_ip is '最后修改IP';
 comment on column form_collaborators.deleted_at is '软删除标记';
 comment on column form_collaborators.version is '乐观锁';
 
--- 活跃记录唯一约束（推荐）
-create unique index if not exists uk_form_collaborators_active
-    on form_collaborators (form_id, user_id)
-    where deleted_at is null;
--- 根据用户查表单
-create index if not exists idx_form_collaborators_user_id
-    on form_collaborators (user_id)
-    where deleted_at is null;
-
-create table if not exists form_roles
+create table form_roles
 (
     form_role_id          uuid primary key default gen_random_uuid(),
     form_id               uuid        not null,
@@ -183,6 +191,8 @@ create table if not exists form_roles
     deleted_at            timestamptz,
     version               int              default 0
 );
+create unique index uk_form_roles_form_role on form_roles (form_id, role_code) where deleted_at is null;
+
 comment on table form_roles is '表单角色';
 comment on column form_roles.form_id is '表单id';
 comment on column form_roles.role_code is '角色编码';
@@ -198,6 +208,3 @@ comment on column form_roles.updated_ip is '最后修改IP';
 comment on column form_roles.deleted_at is '软删除标记';
 comment on column form_roles.version is '乐观锁';
 
-create unique index if not exists uk_form_roles_form_role
-    on form_roles (form_id, role_code)
-    where deleted_at is null;

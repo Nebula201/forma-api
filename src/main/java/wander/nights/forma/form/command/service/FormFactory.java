@@ -1,6 +1,8 @@
 package wander.nights.forma.form.command.service;
 
 import com.github.f4b6a3.uuid.alt.GUID;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import wander.nights.forma.form.command.dto.RoleCreateCommand;
 import wander.nights.forma.form.command.entity.Form;
@@ -11,19 +13,28 @@ import wander.nights.forma.shared.valueobject.FormRoleCode;
 import wander.nights.forma.shared.valueobject.FormSubmissionId;
 import wander.nights.forma.shared.valueobject.UserId;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@Setter(onMethod_ = @Autowired)
 public class FormFactory {
+    private SequenceGenerator sequenceGenerator;
 
     public FormId nextFormId() {
         return new FormId(GUID.v7().toUUID());
     }
 
-    public FormSubmissionId nextSubmissionId() {
-        return new FormSubmissionId(GUID.v7().toUUID());
+    public FormSubmissionId nextSubmissionId(FormId formId) {
+        return new FormSubmissionId(formId, Math.toIntExact(sequenceGenerator.nextSubmissionNo(formId)));
+    }
+
+    public List<FormSubmissionId> nextSubmissionId(FormId formId, int count) {
+        return sequenceGenerator.nextSubmissionNo(formId, count).stream()
+                .map(number -> new FormSubmissionId(formId, Math.toIntExact(number)))
+                .collect(Collectors.toList());
     }
 
     public Form createForm(String code, String title, String description) {

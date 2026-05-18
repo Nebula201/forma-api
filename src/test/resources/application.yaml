@@ -5,7 +5,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://127.0.0.1:5432/forma?reWriteBatchedInserts=true&serverTimezone=Asia/Shanghai
     username: forma
-    password: 123456
+    password: pwd_forma
   jpa:
     show-sql: true
     hibernate:

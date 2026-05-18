@@ -28,15 +28,9 @@ public class FormSubmission extends BaseEntity {
      * 数据Id
      */
     @EmbeddedId
-    @AttributeOverride(name = "value", column = @Column(name = "submission_id"))
+    @AttributeOverride(name = "formId.value", column = @Column(name = "form_id"))
+    @AttributeOverride(name = "submissionNo", column = @Column(name = "submission_no"))
     private FormSubmissionId formSubmissionId;
-
-    /**
-     * 表单Id
-     */
-    @Column(name = "form_id")
-    @Convert(converter = JpaConverters.FormIdConverter.class)
-    private FormId formId;
 
     /**
      * 表单版本
@@ -123,4 +117,9 @@ public class FormSubmission extends BaseEntity {
     @Column(name = "attributes")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> attributes;
+
+
+    public FormId getFormId() {
+        return getFormSubmissionId().formId();
+    }
 }

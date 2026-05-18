@@ -39,8 +39,7 @@ public class FormSubmissionCommandServiceImpl implements FormSubmissionCommandSe
         this.validate(formVersion.getFormContent(), request.getContent());
 
         FormSubmission formSubmission = new FormSubmission();
-        formSubmission.setFormSubmissionId(formFactory.nextSubmissionId());
-        formSubmission.setFormId(formId);
+        formSubmission.setFormSubmissionId(formFactory.nextSubmissionId(formId));
         formSubmission.setFormVersion(request.getFormVersion());
         formSubmission.setContent(request.getContent());
         formSubmission.setDurationSecond(request.getDurationSecond());
