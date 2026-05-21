@@ -17,8 +17,8 @@ import wander.nights.forma.form.command.repository.FormRoleRepository;
 import wander.nights.forma.form.command.service.FormCommandService;
 import wander.nights.forma.form.command.service.FormFactory;
 import wander.nights.forma.shared.context.RequestContext;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.time.Instant;
 
@@ -33,7 +33,7 @@ public class FormCommandServiceImpl implements FormCommandService {
 
     @Override
     @Transactional
-    public FormId createForm(UserId userId, FormCreateCommand request) {
+    public FormId createForm(OperatorId userId, FormCreateCommand request) {
         Form form = formFactory.createForm(request.getCode(), request.getTitle(), request.getDescription());
         FormId formId = form.getFormId();
 
@@ -49,7 +49,7 @@ public class FormCommandServiceImpl implements FormCommandService {
         return formId;
     }
 
-    private void publishFormCreatedEvent(Form form, UserId userId) {
+    private void publishFormCreatedEvent(Form form, OperatorId userId) {
         FormCreatedV1 payload = new FormCreatedV1();
         payload.setFormId(form.getFormId().value().toString());
         payload.setFormCode(form.getCode());
@@ -70,9 +70,14 @@ public class FormCommandServiceImpl implements FormCommandService {
         formRepository.deleteById(formId);
         FormDeletedV1 payload = new FormDeletedV1();
         payload.setFormId(formId);
-        payload.setDeletedBy(RequestContext.currentUserId());
+        payload.setDeletedBy(RequestContext.currentOperatorId());
         payload.setDeletedAt(Instant.now());
         eventPublisher.publish(new FormaEvent<>(payload));
+    }
+
+    @Override
+    public void release(FormId formId) {
+
     }
 
 

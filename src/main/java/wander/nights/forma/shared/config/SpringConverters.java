@@ -3,7 +3,7 @@ package wander.nights.forma.shared.config;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
 import wander.nights.forma.shared.valueobject.UserId;
 

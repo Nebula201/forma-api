@@ -1,11 +1,11 @@
 package wander.nights.forma.shared.context;
 
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 public record UserAttributes(
-        UserId userId
+        OperatorId operatorId
 ) {
-    public static UserAttributes of(UserId userId) {
-        return new UserAttributes(userId);
+    public static UserAttributes of(OperatorId operatorId) {
+        return new UserAttributes(operatorId);
     }
 }

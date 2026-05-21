@@ -97,7 +97,7 @@ class Ip2RegionIpServiceTest {
             "192.168.1"
     })
     @DisplayName("测试非法 IP 地址")
-    void testInvalidIpAddress(String invalidIp) throws UnknownHostException {
+    void testInvalidIpAddress(String invalidIp) {
 //        assertThrows(UnknownHostException.class, () -> InetAddress.getByName(invalidIp), "地址" + invalidIp + "应是无效地址");
         assertEquals(Region.UNKNOWN, ipService.resolveIpAddress(invalidIp), "地址 " + invalidIp + " 应该被识别为无效地址");
     }

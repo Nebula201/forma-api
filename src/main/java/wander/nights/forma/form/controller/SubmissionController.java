@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import wander.nights.forma.form.command.dto.SubmissionSubmitCommand;
 import wander.nights.forma.form.query.dto.submission.SubmissionVo;
 import wander.nights.forma.form.query.dto.FormSubmissionReadRequests;
-import wander.nights.forma.form.query.service.FormSubmissionReadService;
-import wander.nights.forma.form.command.service.FormSubmissionCommandService;
+import wander.nights.forma.submission.service.FormSubmissionReadService;
+import wander.nights.forma.submission.service.FormSubmissionCommandService;
 import wander.nights.forma.shared.response.Result;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.FormSubmissionId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.submission.domain.FormSubmissionId;
 
 @Tag(name = "表单数据管理")
 @RestController

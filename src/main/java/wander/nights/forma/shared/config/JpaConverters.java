@@ -2,7 +2,7 @@ package wander.nights.forma.shared.config;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
 import wander.nights.forma.shared.valueobject.UserId;
 

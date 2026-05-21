@@ -8,10 +8,11 @@ import wander.nights.forma.form.command.dto.RoleCreateCommand;
 import wander.nights.forma.form.command.entity.Form;
 import wander.nights.forma.form.command.entity.FormCollaborator;
 import wander.nights.forma.form.command.entity.FormRole;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.shared.valueobject.FormSubmissionId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.submission.domain.FormSubmissionId;
+import wander.nights.forma.submission.service.SubmissionNoProvider;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,18 +22,18 @@ import java.util.stream.Collectors;
 @Component
 @Setter(onMethod_ = @Autowired)
 public class FormFactory {
-    private SequenceGenerator sequenceGenerator;
+    private SubmissionNoProvider submissionNoProvider;
 
     public FormId nextFormId() {
         return new FormId(GUID.v7().toUUID());
     }
 
     public FormSubmissionId nextSubmissionId(FormId formId) {
-        return new FormSubmissionId(formId, Math.toIntExact(sequenceGenerator.nextSubmissionNo(formId)));
+        return new FormSubmissionId(formId, Math.toIntExact(submissionNoProvider.nextSubmissionNo(formId)));
     }
 
     public List<FormSubmissionId> nextSubmissionId(FormId formId, int count) {
-        return sequenceGenerator.nextSubmissionNo(formId, count).stream()
+        return submissionNoProvider.nextSubmissionNo(formId, count).stream()
                 .map(number -> new FormSubmissionId(formId, Math.toIntExact(number)))
                 .collect(Collectors.toList());
     }
@@ -92,7 +93,7 @@ public class FormFactory {
         return formRole;
     }
 
-    public FormCollaborator createFormCollaborator(FormId formId, UserId userId, FormRole role) {
+    public FormCollaborator createFormCollaborator(FormId formId, OperatorId userId, FormRole role) {
         FormCollaborator collaborator = new FormCollaborator();
         collaborator.setFormId(formId);
         collaborator.setUserId(userId);

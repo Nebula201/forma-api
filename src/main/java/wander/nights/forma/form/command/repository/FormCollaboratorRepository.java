@@ -3,8 +3,8 @@ package wander.nights.forma.form.command.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import wander.nights.forma.form.command.entity.FormCollaborator;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,5 +15,5 @@ public interface FormCollaboratorRepository extends JpaRepository<FormCollaborat
 
     List<FormCollaborator> findByFormId(FormId formId);
 
-    Optional<FormCollaborator> findByFormIdAndUserId(FormId formId, UserId userId);
+    Optional<FormCollaborator> findByFormIdAndUserId(FormId formId, OperatorId userId);
 }

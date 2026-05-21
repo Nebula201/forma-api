@@ -10,7 +10,8 @@ import org.hibernate.type.SqlTypes;
 import wander.nights.forma.model.FormSetting;
 import wander.nights.forma.model.fields.FieldDefinition;
 import wander.nights.forma.model.rule.RuleDefinition;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.entity.BaseEntity;
+import wander.nights.forma.shared.identifier.FormId;
 
 import java.util.List;
 

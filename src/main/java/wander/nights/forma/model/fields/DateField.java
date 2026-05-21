@@ -2,6 +2,8 @@ package wander.nights.forma.model.fields;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import wander.nights.forma.model.fields.answer.Answer;
+import wander.nights.forma.model.fields.answer.DateFieldAnswer;
 
 import java.time.LocalDate;
 
@@ -16,4 +18,9 @@ public class DateField extends FieldDefinition {
     private LocalDate minDate;
     private LocalDate maxDate;
     private Boolean enableTime = false;
+
+    @Override
+    public <T, A extends FieldDefinition> T accept(FieldVisitor<T> visitor, Answer<A> answerValue) {
+        return visitor.visit(this, answerValue);
+    }
 }

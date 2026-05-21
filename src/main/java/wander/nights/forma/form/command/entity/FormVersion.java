@@ -9,8 +9,9 @@ import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import wander.nights.forma.model.FormContent;
 import wander.nights.forma.shared.config.JpaConverters;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.entity.BaseEntity;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.net.InetAddress;
 import java.time.Instant;
@@ -69,7 +70,7 @@ public class FormVersion extends BaseEntity {
      */
     @Column(name = "published_by")
     @Convert(converter = JpaConverters.UserIdConverter.class)
-    private UserId publishedBy;
+    private OperatorId publishedBy;
 
     /**
      * 发布时间

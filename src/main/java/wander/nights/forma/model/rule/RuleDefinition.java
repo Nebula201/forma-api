@@ -1,7 +1,7 @@
 package wander.nights.forma.model.rule;
 
 import lombok.Data;
-import wander.nights.forma.shared.valueobject.FieldCode;
+import wander.nights.forma.shared.identifier.FieldCode;
 
 import java.util.Set;
 

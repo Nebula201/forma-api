@@ -6,9 +6,10 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import wander.nights.forma.shared.config.JpaConverters;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.entity.BaseEntity;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.shared.valueobject.UserId;
 
 import java.util.UUID;
 
@@ -35,8 +36,8 @@ public class FormCollaborator extends BaseEntity {
      * 用户Id
      */
     @Column(name = "user_id")
-    @Convert(converter = JpaConverters.UserIdConverter.class)
-    private UserId userId;
+    @AttributeOverride(name = "value", column = @Column(name = "user_id"))
+    private OperatorId userId;
 
     /**
      * 角色编码

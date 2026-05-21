@@ -10,7 +10,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import wander.nights.forma.shared.config.JpaConverters;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.entity.BaseEntity;
+import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
 
 import java.util.List;

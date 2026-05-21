@@ -2,7 +2,7 @@ package wander.nights.forma.model.rule;
 
 import lombok.Data;
 import lombok.Getter;
-import wander.nights.forma.shared.valueobject.FieldCode;
+import wander.nights.forma.shared.identifier.FieldCode;
 
 @Data
 public class Condition {

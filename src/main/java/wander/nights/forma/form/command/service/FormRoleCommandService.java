@@ -1,7 +1,7 @@
 package wander.nights.forma.form.command.service;
 
 import wander.nights.forma.form.command.dto.RoleCreateCommand;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
 
 public interface FormRoleCommandService {

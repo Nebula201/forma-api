@@ -10,9 +10,9 @@ import wander.nights.forma.form.command.service.FormCollaboratorCommandService;
 import wander.nights.forma.form.query.dto.collaborator.CollaboratorVo;
 import wander.nights.forma.form.query.dto.collaborator.QueryCollaborator;
 import wander.nights.forma.form.query.service.FormCollaboratorReadService;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.response.Result;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,9 +43,9 @@ public class FormCollaboratorController {
     }
 
     @Operation(summary = "移除协作者")
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{operatorId}")
     public Result<?> delete(@PathVariable FormId formId,
-                            @PathVariable UserId userId) {
+                            @PathVariable OperatorId userId) {
         formCollaboratorCommandService.deleteCollaborator(formId, userId);
         return Result.ok("");
     }

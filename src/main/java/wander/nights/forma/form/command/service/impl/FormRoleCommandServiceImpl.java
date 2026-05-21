@@ -8,7 +8,7 @@ import wander.nights.forma.form.command.repository.FormRoleRepository;
 import wander.nights.forma.form.command.service.FormFactory;
 import wander.nights.forma.form.command.service.FormRoleCommandService;
 import wander.nights.forma.shared.exception.OperationNotAllowException;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
 
 import java.util.Optional;

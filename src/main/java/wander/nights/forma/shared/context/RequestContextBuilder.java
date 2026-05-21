@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import wander.nights.forma.shared.service.IpService;
 import wander.nights.forma.shared.valueobject.Region;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.net.InetAddress;
 import java.time.Instant;
@@ -36,13 +36,13 @@ public class RequestContextBuilder {
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
             String principalName = authentication.getName();
-            return UserAttributes.of(UserId.of(principalName));
+            return UserAttributes.of(OperatorId.of(principalName));
         }
 
         // Fallback: 从请求头获取（网关透传场景）
         String userIdHeader = request.getHeader("X-User-Id");
         if (userIdHeader != null && !userIdHeader.isBlank()) {
-            return UserAttributes.of(UserId.of(userIdHeader));
+            return UserAttributes.of(OperatorId.of(userIdHeader));
         }
 
         // 匿名请求

@@ -7,15 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import wander.nights.forma.form.command.dto.FormCreateCommand;
 import wander.nights.forma.form.command.entity.Form;
 import wander.nights.forma.form.command.repository.FormRepository;
-import wander.nights.forma.shared.context.EnvironmentAttributes;
 import wander.nights.forma.shared.context.RequestContext;
 import wander.nights.forma.shared.context.UserAttributes;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,14 +26,14 @@ class FormCommandServiceTest {
     @BeforeEach
     void setUpRequestContext() throws UnknownHostException {
         // 设置 RequestContext 用于 deleteForm 方法
-        UserId userId = new UserId("123");
-        UserAttributes userAttributes = UserAttributes.of(userId);
+        OperatorId operatorId = OperatorId.of("123");
+        UserAttributes userAttributes = UserAttributes.of(operatorId);
         RequestContext.set(new RequestContext(userAttributes, null));
     }
 
     @Test
     void testCreateForm() {
-        UserId userId = new UserId("123");
+        OperatorId userId = new OperatorId("123");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode("test");
@@ -53,14 +50,14 @@ class FormCommandServiceTest {
 
     @Test
     void testCreateFormWithDifferentCode() {
-        UserId userId = new UserId("456");
+        OperatorId OperatorId = new OperatorId("456");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode("survey");
         command.setTitle("问卷调查");
         command.setDescription("用户问卷调查");
 
-        FormId formId = formCommandService.createForm(userId, command);
+        FormId formId = formCommandService.createForm(OperatorId, command);
         assertNotNull(formId);
 
         formCommandService.deleteForm(formId);
@@ -69,13 +66,13 @@ class FormCommandServiceTest {
 
     @Test
     void testCreateFormWithMinimalFields() {
-        UserId userId = new UserId("789");
+        OperatorId OperatorId = new OperatorId("789");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode("simple");
         command.setTitle("简单表单");
 
-        FormId formId = formCommandService.createForm(userId, command);
+        FormId formId = formCommandService.createForm(OperatorId, command);
         assertNotNull(formId);
 
         formCommandService.deleteForm(formId);
@@ -85,25 +82,25 @@ class FormCommandServiceTest {
     @Test
     void testCreateFormWithMultipleUsers() {
         // 用户1创建表单
-        UserId userId1 = new UserId("user1");
+        OperatorId OperatorId1 = new OperatorId("user1");
 
         FormCreateCommand command1 = new FormCreateCommand();
         command1.setCode("form1");
         command1.setTitle("表单1");
         command1.setDescription("用户1的表单");
 
-        FormId formId1 = formCommandService.createForm(userId1, command1);
+        FormId formId1 = formCommandService.createForm(OperatorId1, command1);
         assertNotNull(formId1);
 
         // 用户2创建表单
-        UserId userId2 = new UserId("user2");
+        OperatorId OperatorId2 = new OperatorId("user2");
 
         FormCreateCommand command2 = new FormCreateCommand();
         command2.setCode("form2");
         command2.setTitle("表单2");
         command2.setDescription("用户2的表单");
 
-        FormId formId2 = formCommandService.createForm(userId2, command2);
+        FormId formId2 = formCommandService.createForm(OperatorId2, command2);
         assertNotNull(formId2);
 
         // 验证两个表单都存在
@@ -120,7 +117,7 @@ class FormCommandServiceTest {
 
     @Test
     void testCreateFormWithEmptyCode() {
-        UserId userId = new UserId("111");
+        OperatorId OperatorId = new OperatorId("111");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode(""); // 测试空代码情况
@@ -128,13 +125,13 @@ class FormCommandServiceTest {
         command.setDescription("测试空代码");
 
         assertThrows(IllegalArgumentException.class, () -> {
-            formCommandService.createForm(userId, command);
+            formCommandService.createForm(OperatorId, command);
         });
     }
 
     @Test
     void testCreateFormWithEmptyTitle() {
-        UserId userId = new UserId("222");
+        OperatorId OperatorId = new OperatorId("222");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode("valid-code");
@@ -142,7 +139,7 @@ class FormCommandServiceTest {
         command.setDescription("测试空标题");
 
         assertThrows(IllegalArgumentException.class, () -> {
-            formCommandService.createForm(userId, command);
+            formCommandService.createForm(OperatorId, command);
         });
     }
 
@@ -157,14 +154,14 @@ class FormCommandServiceTest {
 
     @Test
     void testCreateAndQueryForm() {
-        UserId userId = new UserId("333");
+        OperatorId OperatorId = new OperatorId("333");
 
         FormCreateCommand command = new FormCreateCommand();
         command.setCode("query-test");
         command.setTitle("查询测试表单");
         command.setDescription("用于测试查询的表单");
 
-        FormId formId = formCommandService.createForm(userId, command);
+        FormId formId = formCommandService.createForm(OperatorId, command);
 
         // 查询验证
         assertTrue(formRepository.findById(formId).isPresent());

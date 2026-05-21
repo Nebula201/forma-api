@@ -7,9 +7,9 @@ import wander.nights.forma.form.command.entity.FormCollaborator;
 import wander.nights.forma.form.command.repository.FormCollaboratorRepository;
 import wander.nights.forma.form.command.service.FormCollaboratorCommandService;
 import wander.nights.forma.shared.exception.OperationNotAllowException;
-import wander.nights.forma.shared.valueobject.FormId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.shared.valueobject.UserId;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class FormCollaboratorCommandServiceImpl implements FormCollaboratorComma
     }
 
     @Override
-    public void deleteCollaborator(FormId formId, UserId userId) {
+    public void deleteCollaborator(FormId formId, OperatorId userId) {
         Optional<FormCollaborator> optionalFormCollaborator = formCollaboratorRepository.findByFormIdAndUserId(formId, userId);
         if (optionalFormCollaborator.isEmpty()) return;
 

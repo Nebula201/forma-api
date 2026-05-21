@@ -2,15 +2,15 @@ package wander.nights.forma.event.payload;
 
 import lombok.Data;
 import wander.nights.forma.event.DomainEvent;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.time.Instant;
 
 @Data
 public class FormDeletedV1 implements DomainEvent {
     private FormId formId;
-    private UserId deletedBy;
+    private OperatorId deletedBy;
     private Instant deletedAt;
 
     @Override

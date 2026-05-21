@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import wander.nights.forma.shared.valueobject.FieldCode;
+import wander.nights.forma.model.fields.answer.Answer;
+import wander.nights.forma.shared.identifier.FieldCode;
 
 /**
  * 字段定义基类，支持多态反序列化
@@ -23,7 +24,8 @@ import wander.nights.forma.shared.valueobject.FieldCode;
         @JsonSubTypes.Type(value = RatingField.class, name = "rating"),
         @JsonSubTypes.Type(value = DateField.class, name = "date"),
         @JsonSubTypes.Type(value = DateField.class, name = "time"),
-        @JsonSubTypes.Type(value = FileField.class, name = "file")
+        @JsonSubTypes.Type(value = FileField.class, name = "file"),
+        @JsonSubTypes.Type(value = MatrixSelectField.class, name = "matrix")
 })
 public abstract class FieldDefinition {
     /**
@@ -56,5 +58,5 @@ public abstract class FieldDefinition {
      */
     private Integer position;
 
-
+    public abstract <T, F extends FieldDefinition> T accept(FieldVisitor<T> visitor, Answer<F> answerValue);
 }

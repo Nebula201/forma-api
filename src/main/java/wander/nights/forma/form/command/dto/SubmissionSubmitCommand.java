@@ -2,7 +2,7 @@ package wander.nights.forma.form.command.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import wander.nights.forma.shared.valueobject.FieldCode;
+import wander.nights.forma.shared.identifier.FieldCode;
 
 import java.util.Map;
 

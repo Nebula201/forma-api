@@ -1,6 +1,6 @@
 package wander.nights.forma.shared.context;
 
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public final class RequestContext {
         return Optional.ofNullable(env());
     }
 
-    public static UserId currentUserId() {
-        return userOpt().map(UserAttributes::userId).orElse(null);
+    public static OperatorId currentOperatorId() {
+        return userOpt().map(UserAttributes::operatorId).orElse(null);
     }
 }

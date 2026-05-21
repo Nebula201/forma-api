@@ -4,8 +4,8 @@ import lombok.Data;
 import wander.nights.forma.event.DomainEvent;
 import wander.nights.forma.form.command.entity.Form;
 import wander.nights.forma.form.command.entity.FormVersion;
-import wander.nights.forma.shared.valueobject.FormId;
-import wander.nights.forma.shared.valueobject.UserId;
+import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 
 import java.time.Instant;
 
@@ -15,7 +15,7 @@ public class FormPublishedV1 implements DomainEvent {
     private Integer formVersion;
     private String formTitle;
     private String url;
-    private UserId publishedBy;
+    private OperatorId publishedBy;
     private Instant publishedAt;
 
     public FormPublishedV1(Form form, FormVersion formVersion) {
