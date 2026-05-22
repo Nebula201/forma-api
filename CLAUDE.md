@@ -2,10 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 语言偏好
+## Language Preferences
 
-- 请始终使用简体中文回复。
-- Git commit message 必须使用中文。
+- Always respond in Simplified Chinese.
+- Git commit messages must be written in Chinese.
 
 ## Project Overview
 
@@ -38,38 +38,44 @@ architecture.
 
 ## Architecture Overview
 
-### CQRS Package Structure
+### DDD Core Domain Boundaries
 
-The `form` domain follows Command Query Responsibility Segregation:
+The system is divided into the following core business domains based on DDD. Currently organized by packages, with plans
+to split into separate modules by domain. Dependency rules must be strictly followed.
 
-```
-wander.nights.forma.form
-├── command/                    # Write side
-│   ├── entity/                 # JPA entities (Form, FormVersion, FormSubmission, FormRole, FormCollaborator)
-│   ├── repository/             # Spring Data JPA repositories
-│   ├── service/                # Command service interfaces + impl/
-│   ├── dto/                    # Command DTOs (FormCreateCommand, SubmissionSubmitCommand, etc.)
-│   └── service/FormFactory     # Entity construction factory (IDs, defaults, roles)
-├── query/                      # Read side
-│   ├── service/                # Query service interfaces + impl/
-│   └── dto/                    # Read DTOs / VOs
-└── controller/                 # REST controllers (inject both command and query services)
-```
+- **forma-shared (Shared Domain):** Provides cross-domain shared kernel and common capabilities.
+- **forma-iam (Identity & Access Control Domain)**: Handles user authentication, authorization, and permission
+  management.
+- **forma-form (Form Design & Management Domain)**: Manages form structure definition, form collaboration, and version
+  management.
+- **forma-submission (Data Submission & Storage Domain)**: Handles form instance data submission, draft saving,
+  validation, and querying.
+- **forma-analysis (Analysis Domain)** [Planned]: Manages form data aggregation, report generation, and visualization
+  dashboards.
 
-Command and query services are separate interfaces with separate implementations. Controllers inject both sides.
+**Dependency Rules**: Business domains can only have one-way dependencies. Circular dependencies are strictly
+prohibited.Dependency direction: submission → form → shared, iam → shared. Any domain may depend on shared, but shared
+cannot depend on any business domain.
+
+### CQRS Read/Write Separation
+
+- **Command (Write)**: Uses ORM (JPA/Hibernate) for domain model persistence, ensuring data consistency.
+
+- **Query (Read)**: Uses JDBC Template (or native SQL) for direct database queries, returning read-optimized DTOs/view
+  objects, bypassing the domain model.
+
+- **Principle**: Command and Query share the same database but are logically separated. Write operations go through the
+  domain model; read operations use direct SQL queries.
+
+All converters are in `shared.config.JpaConverters` with `@Converter(autoApply = true)`.
 
 ### Value Objects with JPA Converters
 
-Domain identifiers and typed codes are modeled as Java records with `@Embeddable` or standalone, converted via
-`JpaConverters`:
-
 - `FormId` (UUID) — `@Embeddable`, used as `@EmbeddedId` on Form
-- `FormSubmissionId` (UUID) — `@Embeddable`, used as `@EmbeddedId` on FormSubmission
-- `UserId` (String) — `@Embeddable`, auto-applied converter
-- `FieldCode` (String) — standalone record, used as Map keys in submission content
-- `FormRoleCode` (String) — auto-applied converter
-
-All converters are in `shared.config.JpaConverters` with `@Converter(autoApply = true)`.
+- `FormSubmissionId` (FormId, submissionNo) — `@Embeddable`, used as `@EmbeddedId` on FormSubmission
+- `OperatorId` (String) — @Embeddable, current operator for auditing (comes from UserId in iam domain)
+- `FieldCode` (String) — standalone record, used as Map key in submission content, unique within a form
+- `FormRoleCode` (String) — form role code, unique within a form
 
 ### JSONB Polymorphic Serialization
 
@@ -102,14 +108,14 @@ Entities use Hibernate annotations for logical deletion:
 @SQLRestriction("deleted_at is null")
 ```
 
-Applied to: Form, FormSubmission. All queries automatically exclude soft-deleted records.
+Applied to all entities extending `BaseEntity`. All queries automatically exclude soft-deleted records.
 
 ### Form Roles and Collaborators
 
 - `FormRole` — per-form role with `OperationPermission` enum (submission/form CRUD, approve, assign) and
   `AccessPermission` (field-level + record filter conditions)
 - `FormCollaborator` — links a UserId to a FormId with a FormRoleCode; partial unique index on
-  `(form_id, user_id) WHERE deleted_at IS null`
+  `(form_id, operator_id) WHERE deleted_at IS null`
 - `FormFactory` creates default roles (owner, admin, viewer) and the owner collaborator on form creation
 
 ### Error Handling
@@ -120,9 +126,20 @@ Applied to: Form, FormSubmission. All queries automatically exclude soft-deleted
 - `GlobalExceptionHandler` returns RFC 7807 `ProblemDetail` responses with `code` and `timestamp` properties
 - Success responses use `Result<T>` wrapper: `{ "code": 200, "message": "", "data": T }`
 
-### Database Schema
+### Database Structure
 
-Five tables managed by Flyway (`V0.1.0__init_table.sql`):
+#### Migration Management
+
+Database is version-managed via Flyway. All changes must be implemented through migration scripts.
+
+- **Migration file location**：`src/main/resources/db/migration/`
+- **Naming convention**：`V{版本号}__{描述}.sql`（e.g., `V0.1.0__init_table.sql`）
+- **Execution timing**：Automatically executed in version order on application startup
+
+**Note**：Table structure evolves with new migration scripts. Always refer to the actual files in db/migration directory.
+Already executed migration scripts must not be modified.
+
+#### Core Tables (as of latest migration)
 
 - `forms` — form definitions with JSONB fields/rules/settings, status (DRAFT/PUBLISHED/CLOSED)
 - `form_versions` — published snapshots with `form_content` JSONB
@@ -133,12 +150,12 @@ Five tables managed by Flyway (`V0.1.0__init_table.sql`):
 All tables have `created_by`, `created_at`, `updated_by`, `updated_at`, `updated_ip` (inet), `deleted_at` audit columns
 via `BaseEntity`.
 
-## Key Conventions
+## Code Conventions
 
-- Controllers use `@Setter(onMethod_ = @Autowired)` for DI (Lombok), services use `@RequiredArgsConstructor`
+- All database operations must go through Repository layer. Writing SQL directly in Service layer is prohibited.
+- Prefer `@RequiredArgsConstructor` + final fields for dependency injection in Spring beans, or use `@Setter(onMethod_ =
+  @Autowired)`
 - API endpoints are under `/v1/` prefix with springdoc-openapi annotations (`@Tag`, `@Operation`)
-- `FormFactory` centralizes entity construction — IDs are generated with `GUID.v7().toUUID()` (uuid-creator library)
 - `BaseEntity` provides JPA auditing (`@CreatedDate`, `@CreatedBy`, `@LastModifiedDate`, `@LastModifiedBy`) and soft
   delete (`deletedAt`)
-- IP auditing in `BaseEntity` (`@PreUpdate`/`@PrePersist`) is commented out pending `AuditContext` implementation
 - Spring Security dependency is present but not yet configured
