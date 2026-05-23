@@ -1,35 +1,28 @@
 package wander.nights.forma.shared.condition;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * 条件组（Composite）
  */
-@Getter
-public class ConditionGroup implements ConditionExpression {
-    private final CombineType combineType;
-    private final List<ConditionExpression> children;
-
+public record ConditionGroup(
+        CombineType combineType,
+        List<ConditionExpression> children
+) implements ConditionExpression {
     public ConditionGroup(CombineType combineType) {
-        this(combineType, new ArrayList<>());
+        this(combineType, List.of());
     }
 
     public ConditionGroup(CombineType combineType, List<ConditionExpression> children) {
         this.combineType = combineType;
-        this.children = new ArrayList<>(children);
+        this.children = List.copyOf(children);
     }
 
     public ConditionGroup add(ConditionExpression expr) {
-        children.add(expr);
-        return this;
-    }
-
-    public List<ConditionExpression> getChildren() {
-        return Collections.unmodifiableList(children);
+        List<ConditionExpression> newChildren = new ArrayList<>(children);
+        newChildren.add(expr);
+        return new ConditionGroup(combineType, newChildren);
     }
 
     @Override

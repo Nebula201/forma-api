@@ -8,13 +8,11 @@ import wander.nights.forma.form.command.dto.RoleCreateCommand;
 import wander.nights.forma.form.command.entity.Form;
 import wander.nights.forma.form.command.entity.FormCollaborator;
 import wander.nights.forma.form.command.entity.FormRole;
+import wander.nights.forma.form.command.entity.FormOperationPermission;
 import wander.nights.forma.shared.identifier.FormId;
 import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.submission.domain.FormSubmissionId;
-import wander.nights.forma.submission.service.SubmissionNoProvider;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,21 +20,11 @@ import java.util.stream.Collectors;
 @Component
 @Setter(onMethod_ = @Autowired)
 public class FormFactory {
-    private SubmissionNoProvider submissionNoProvider;
 
     public FormId nextFormId() {
         return new FormId(GUID.v7().toUUID());
     }
 
-    public FormSubmissionId nextSubmissionId(FormId formId) {
-        return new FormSubmissionId(formId, Math.toIntExact(submissionNoProvider.nextSubmissionNo(formId)));
-    }
-
-    public List<FormSubmissionId> nextSubmissionId(FormId formId, int count) {
-        return submissionNoProvider.nextSubmissionNo(formId, count).stream()
-                .map(number -> new FormSubmissionId(formId, Math.toIntExact(number)))
-                .collect(Collectors.toList());
-    }
 
     public Form createForm(String code, String title, String description) {
         Form form = new Form();
@@ -53,7 +41,7 @@ public class FormFactory {
         formRole.setFormId(formId);
         formRole.setCode(new FormRoleCode("owner"));
         formRole.setName("所有者");
-        formRole.setOperationPermissions(FormRole.OperationPermission.ALL);
+        formRole.setOperationPermissions(FormOperationPermission.ALL);
         return formRole;
     }
 
@@ -62,7 +50,7 @@ public class FormFactory {
         formRole.setFormId(formId);
         formRole.setCode(new FormRoleCode("admin"));
         formRole.setName("管理员");
-        formRole.setOperationPermissions(FormRole.OperationPermission.ALL);
+        formRole.setOperationPermissions(FormOperationPermission.ALL);
         return formRole;
     }
 
@@ -71,8 +59,8 @@ public class FormFactory {
         formRole.setFormId(formId);
         formRole.setCode(new FormRoleCode("viewer"));
         formRole.setName("数据浏览员");
-        Set<FormRole.OperationPermission> set = Set.of(
-                FormRole.OperationPermission.SUBMISSION_VIEW
+        Set<FormOperationPermission> set = Set.of(
+                FormOperationPermission.SUBMISSION_VIEW
         );
         formRole.setOperationPermissions(set);
 
@@ -87,7 +75,7 @@ public class FormFactory {
         formRole.setName(command.getRoleName());
         formRole.setAccessPermissions(command.getAccessPermission());
         formRole.setOperationPermissions(command.getOperations().stream()
-                .map(FormRole.OperationPermission::fromCode)
+                .map(FormOperationPermission::fromCode)
                 .filter(Objects::nonNull).collect(Collectors.toSet())
         );
         return formRole;
@@ -96,7 +84,7 @@ public class FormFactory {
     public FormCollaborator createFormCollaborator(FormId formId, OperatorId userId, FormRole role) {
         FormCollaborator collaborator = new FormCollaborator();
         collaborator.setFormId(formId);
-        collaborator.setUserId(userId);
+        collaborator.setOperatorId(userId);
         collaborator.setRoleCode(role.getCode());
         return collaborator;
     }

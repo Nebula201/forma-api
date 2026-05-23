@@ -69,7 +69,6 @@ public class FormVersion extends BaseEntity {
      * 发布人
      */
     @Column(name = "published_by")
-    @Convert(converter = JpaConverters.UserIdConverter.class)
     private OperatorId publishedBy;
 
     /**

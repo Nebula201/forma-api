@@ -3,8 +3,8 @@ package wander.nights.forma.shared.config;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.shared.valueobject.UserId;
 
 
 import java.util.UUID;
@@ -38,15 +38,15 @@ public abstract class JpaConverters {
     }
 
     @Converter(autoApply = true)
-    public static class UserIdConverter implements AttributeConverter<UserId, String> {
+    public static class OperatorIdConverter implements AttributeConverter<OperatorId, String> {
         @Override
-        public String convertToDatabaseColumn(UserId attribute) {
+        public String convertToDatabaseColumn(OperatorId attribute) {
             return attribute == null ? null : attribute.value();
         }
 
         @Override
-        public UserId convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : new UserId(dbData);
+        public OperatorId convertToEntityAttribute(String dbData) {
+            return dbData == null ? null : OperatorId.of(dbData);
         }
     }
 }

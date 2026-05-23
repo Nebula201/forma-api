@@ -146,25 +146,25 @@ comment on column form_submission_sequence.current_no is '当前编号';
 
 create table form_collaborators
 (
-    id         uuid primary key default gen_random_uuid(),
-    form_id    uuid        not null,
-    user_id    varchar(50) not null,
-    role_code  varchar(32),
-    created_by varchar(50),
-    created_at timestamptz      default current_timestamp,
-    updated_by varchar(50),
-    updated_at timestamptz      default current_timestamp,
-    updated_ip inet,
-    deleted_at timestamptz,
-    version    int              default 0
+    id          uuid primary key default gen_random_uuid(),
+    form_id     uuid        not null,
+    operator_id varchar(50) not null,
+    role_code   varchar(32),
+    created_by  varchar(50),
+    created_at  timestamptz      default current_timestamp,
+    updated_by  varchar(50),
+    updated_at  timestamptz      default current_timestamp,
+    updated_ip  inet,
+    deleted_at  timestamptz,
+    version     int              default 0
 );
-create unique index uk_form_collaborators_active on form_collaborators (form_id, user_id) where deleted_at is null;
-create index idx_form_collaborators_user_id on form_collaborators (user_id) where deleted_at is null;
+create unique index uk_form_collaborators_active on form_collaborators (form_id, operator_id) where deleted_at is null;
+create index idx_form_collaborators_operator_id on form_collaborators (operator_id) where deleted_at is null;
 
 comment on table form_collaborators is '表单协作者';
 comment on column form_collaborators.id is '主键';
 comment on column form_collaborators.form_id is '表单Id';
-comment on column form_collaborators.user_id is '用户Id';
+comment on column form_collaborators.operator_id is '操作者Id';
 comment on column form_collaborators.role_code is '角色编码';
 comment on column form_collaborators.created_by is '创建人ID';
 comment on column form_collaborators.created_at is '创建时间';

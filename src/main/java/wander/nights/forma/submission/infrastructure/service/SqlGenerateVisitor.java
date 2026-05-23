@@ -38,10 +38,10 @@ public record SqlGenerateVisitor(
 
     @Override
     public SqlFragment visit(ConditionGroup group) {
-        if (group.getChildren().isEmpty()) return SqlFragment.empty();
+        if (group.children().isEmpty()) return SqlFragment.empty();
 
         List<SqlFragment> childFragments = new ArrayList<>();
-        for (ConditionExpression child : group.getChildren()) {
+        for (ConditionExpression child : group.children()) {
             SqlFragment frag = child.accept(this);
             if (frag != null && !frag.sql().isEmpty()) {
                 childFragments.add(frag);
@@ -49,7 +49,7 @@ public record SqlGenerateVisitor(
         }
         if (childFragments.isEmpty()) return SqlFragment.empty();
 
-        if (group.getCombineType() == CombineType.ALL) {
+        if (group.combineType() == CombineType.ALL) {
             return SqlFragment.and(childFragments);
         } else {
             return SqlFragment.or(childFragments);

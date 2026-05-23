@@ -15,5 +15,5 @@ public interface FormCollaboratorRepository extends JpaRepository<FormCollaborat
 
     List<FormCollaborator> findByFormId(FormId formId);
 
-    Optional<FormCollaborator> findByFormIdAndUserId(FormId formId, OperatorId userId);
+    Optional<FormCollaborator> findByFormIdAndOperatorId(FormId formId, OperatorId operatorId);
 }

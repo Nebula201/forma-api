@@ -35,9 +35,9 @@ public class FormCollaborator extends BaseEntity {
     /**
      * 用户Id
      */
-    @Column(name = "user_id")
-    @AttributeOverride(name = "value", column = @Column(name = "user_id"))
-    private OperatorId userId;
+    @Column(name = "operator_id")
+    @AttributeOverride(name = "value", column = @Column(name = "operator_id"))
+    private OperatorId operatorId;
 
     /**
      * 角色编码

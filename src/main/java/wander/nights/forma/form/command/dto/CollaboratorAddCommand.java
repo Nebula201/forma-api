@@ -10,5 +10,5 @@ public class CollaboratorAddCommand {
     @NotNull(message = "角色编码不能为空")
     private FormRoleCode roleCode;
     @NotNull
-    private OperatorId userId;
+    private OperatorId operatorId;
 }

@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import wander.nights.forma.form.command.dto.SubmissionSubmitCommand;
 import wander.nights.forma.form.query.dto.submission.SubmissionVo;
-import wander.nights.forma.form.query.dto.FormSubmissionReadRequests;
+import wander.nights.forma.form.query.dto.SubmissionQuery;
 import wander.nights.forma.submission.service.FormSubmissionReadService;
 import wander.nights.forma.submission.service.FormSubmissionCommandService;
 import wander.nights.forma.shared.response.Result;
@@ -35,7 +35,7 @@ public class SubmissionController {
 
     public Result<Page<SubmissionVo>> page(
             @PathVariable("formId") FormId formId,
-            FormSubmissionReadRequests.Query query) {
+            SubmissionQuery query) {
         return new Result<>();
     }
 }

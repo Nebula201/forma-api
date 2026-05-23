@@ -4,12 +4,9 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import wander.nights.forma.shared.identifier.FormId;
+import wander.nights.forma.shared.identifier.OperatorId;
 import wander.nights.forma.shared.valueobject.FormRoleCode;
-import wander.nights.forma.shared.valueobject.UserId;
 
-/**
- * Spring
- */
 public abstract class SpringConverters {
     @Component
     public static class StringToFormIdConverter implements Converter<String, FormId> {
@@ -28,18 +25,13 @@ public abstract class SpringConverters {
     }
 
     @Component
-    public static class StringToUserIdConverter implements Converter<String, UserId> {
+    public static class StringToOperatorIdConverter implements Converter<String, OperatorId> {
         @Override
-        public UserId convert(String source) {
+        public OperatorId convert(String source) {
             if (source.isBlank()) {
-                throw new IllegalArgumentException("UserId cannot be empty");
+                throw new IllegalArgumentException("OperatorId cannot be empty");
             }
-
-            try {
-                return UserId.of(source);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid UserId format: " + source, e);
-            }
+            return OperatorId.of(source);
         }
     }
 

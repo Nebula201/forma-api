@@ -22,7 +22,7 @@ public class FormCollaboratorCommandServiceImpl implements FormCollaboratorComma
     @Override
     public UUID addCollaborator(FormId formId, CollaboratorAddCommand request) {
         FormCollaborator collaborator = new FormCollaborator();
-        collaborator.setUserId(request.getUserId());
+        collaborator.setOperatorId(request.getOperatorId());
         collaborator.setFormId(formId);
         collaborator.setRoleCode(request.getRoleCode());
         formCollaboratorRepository.save(collaborator);
@@ -31,7 +31,7 @@ public class FormCollaboratorCommandServiceImpl implements FormCollaboratorComma
 
     @Override
     public void deleteCollaborator(FormId formId, OperatorId userId) {
-        Optional<FormCollaborator> optionalFormCollaborator = formCollaboratorRepository.findByFormIdAndUserId(formId, userId);
+        Optional<FormCollaborator> optionalFormCollaborator = formCollaboratorRepository.findByFormIdAndOperatorId(formId, userId);
         if (optionalFormCollaborator.isEmpty()) return;
 
         FormCollaborator collaborator = optionalFormCollaborator.get();
